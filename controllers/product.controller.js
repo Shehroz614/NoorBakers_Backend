@@ -35,8 +35,14 @@ exports.getProducts = async (req, res) => {
         // Filter by location based on user role
         query.location = req.user.role === 'supplier' ? 'supplier' : 'shop';
 
+        // Filter by status if provided
+        if (req.query.status) {
+            query.status = req.query.status;
+        }
+
         const products = await Product.find(query)
-            .populate('supplier', 'name businessName');
+            .populate('supplier', 'name businessName')
+            .sort('-createdAt');
 
         res.json({
             success: true,
@@ -103,7 +109,7 @@ exports.updateProduct = async (req, res) => {
         product = await Product.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true
-        });
+        }).populate('supplier', 'name businessName');
 
         res.json({
             success: true,
@@ -158,7 +164,8 @@ exports.deleteProduct = async (req, res) => {
 // @access  Private
 exports.updateProductQuantity = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const { quantity } = req.body;
+        let product = await Product.findById(req.params.id);
 
         if (!product) {
             return res.status(404).json({
@@ -167,15 +174,25 @@ exports.updateProductQuantity = async (req, res) => {
             });
         }
 
-        // Make sure user is product owner
-        if (product.supplier.toString() !== req.user.id) {
+        // Check if user has access to the product's location
+        if (product.location === 'supplier' && req.user.role !== 'supplier') {
             return res.status(401).json({
                 success: false,
-                message: 'Not authorized to update this product'
+                message: 'Not authorized to update supplier inventory'
             });
         }
 
-        product.quantity = req.body.quantity;
+        product.quantity = quantity;
+        
+        // Update status based on quantity
+        if (quantity <= 0) {
+            product.status = 'out_of_stock';
+        } else if (quantity <= product.minStockLevel) {
+            product.status = 'low_stock';
+        } else {
+            product.status = 'in_stock';
+        }
+
         await product.save();
 
         res.json({
@@ -195,14 +212,16 @@ exports.updateProductQuantity = async (req, res) => {
 // @access  Private
 exports.getLowStockProducts = async (req, res) => {
     try {
-        const query = {
-            supplier: req.user.id,
-            location: req.user.role === 'supplier' ? 'supplier' : 'shop',
+        let query = {
             quantity: { $lte: '$minStockLevel' }
         };
 
+        // Filter by location based on user role
+        query.location = req.user.role === 'supplier' ? 'supplier' : 'shop';
+
         const products = await Product.find(query)
-            .populate('supplier', 'name businessName');
+            .populate('supplier', 'name businessName')
+            .sort('quantity');
 
         res.json({
             success: true,
@@ -235,6 +254,36 @@ exports.getExpiringProducts = async (req, res) => {
                 $lte: expiryDate
             }
         };
+
+        const products = await Product.find(query)
+            .populate('supplier', 'name businessName')
+            .sort('expiryDate');
+
+        res.json({
+            success: true,
+            count: products.length,
+            data: products
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// @desc    Get expired products
+// @route   GET /api/products/expired
+// @access  Private
+exports.getExpiredProducts = async (req, res) => {
+    try {
+        let query = {
+            expiryDate: { $lt: new Date() },
+            status: { $ne: 'expired' }
+        };
+
+        // Filter by location based on user role
+        query.location = req.user.role === 'supplier' ? 'supplier' : 'shop';
 
         const products = await Product.find(query)
             .populate('supplier', 'name businessName')

@@ -8,6 +8,7 @@ const {
     deleteProduct,
     updateProductQuantity,
     getLowStockProducts,
+    getExpiredProducts,
     getExpiringProducts
 } = require('../controllers/product.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
@@ -19,6 +20,7 @@ router.use(protect);
 router.get('/', getProducts);
 router.get('/:id', getProduct);
 router.get('/low-stock', getLowStockProducts);
+router.get('/expired', getExpiredProducts);
 router.get('/expiring', getExpiringProducts);
 router.put('/:id/quantity', updateProductQuantity);
 

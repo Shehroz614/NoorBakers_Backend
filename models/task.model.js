@@ -17,9 +17,6 @@ const taskSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: function() {
-            return this.type === 'haccp';
-        },
         enum: ['receiving', 'storage', 'preparation', 'cooking', 'cooling', 'packaging', 'distribution', 'cleaning', 'pest_control', 'waste_management']
     },
     assignedTo: {
@@ -55,9 +52,6 @@ const taskSchema = new mongoose.Schema({
     // HACCP specific fields
     temperature: {
         type: Number,
-        required: function() {
-            return this.type === 'haccp';
-        },
         validate: {
             validator: function(v) {
                 return v >= -50 && v <= 150; // Reasonable temperature range in Celsius
@@ -65,52 +59,11 @@ const taskSchema = new mongoose.Schema({
             message: 'Temperature must be between -50°C and 150°C'
         }
     },
-    criticalLimit: {
-        type: Number,
-        required: function() {
-            return this.type === 'haccp';
-        },
-        validate: {
-            validator: function(v) {
-                return v > 0;
-            },
-            message: 'Critical limit must be greater than 0'
-        }
-    },
     observations: {
         type: String,
-        required: function() {
-            return this.type === 'haccp';
-        }
     },
     correctiveActions: {
         type: String,
-        required: function() {
-            return this.type === 'haccp' && this.status === 'completed';
-        }
-    },
-    verifiedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    verificationDate: {
-        type: Date
-    },
-    attachments: [{
-        url: String,
-        type: String,
-        uploadedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        uploadedAt: {
-            type: Date,
-            default: Date.now
-        }
-    }],
-    isActive: {
-        type: Boolean,
-        default: true
     }
 }, {
     timestamps: true
