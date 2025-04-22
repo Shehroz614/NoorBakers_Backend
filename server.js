@@ -27,7 +27,7 @@ app.use('/api/', limiter);
 
 // CORS configuration
 const corsOptions = {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: "*",
     credentials: true
 };
 app.use(cors(corsOptions));
@@ -69,7 +69,7 @@ app.use((req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 }); 

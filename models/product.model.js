@@ -10,16 +10,20 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a description']
     },
+    type: {
+        type: String,
+        required: [true, 'Please add a category'],
+        enum: ['Raw', 'Ready']
+    },
     category: {
         type: String,
         required: [true, 'Please add a category'],
-        enum: ['raw_material', 'finished_good']
     },
     materialType: {
         type: String,
         enum: ['active', 'passive'],
         required: function() {
-            return this.category === 'raw_material';
+            return this.category === 'Raw';
         }
     },
     supplier: {
@@ -55,7 +59,7 @@ const productSchema = new mongoose.Schema({
     },
     location: {
         type: String,
-        required: true,
+        // required: true,
         enum: ['supplier', 'shop']
     },
     batchNumber: {
