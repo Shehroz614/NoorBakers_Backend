@@ -4,6 +4,8 @@ const Product = require('../models/product.model');
 // @route   POST /api/products
 // @access  Private/Supplier
 exports.createProduct = async (req, res) => {
+    console.log(`User role ${req.user.role} is not authorized to access this route`);
+
     try {
         req.body.supplier = req.user.id;
         req.body.location = req.user.role === 'supplier' ? 'supplier' : 'shop';

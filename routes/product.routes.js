@@ -26,7 +26,7 @@ router.put('/:id/quantity', updateProductQuantity);
 
 // Routes accessible only by suppliers
 router.post('/', authorize('supplier'), createProduct);
-router.put('/:id', authorize('supplier'), updateProduct);
+router.patch('/:id', authorize('supplier'), updateProduct);
 router.delete('/:id', authorize('supplier'), deleteProduct);
 
 module.exports = router; 
