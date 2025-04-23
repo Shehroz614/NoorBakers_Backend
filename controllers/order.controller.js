@@ -71,20 +71,20 @@ exports.getOrder = async (req, res) => {
             });
         }
 
-        // Check if user has access to this order
-        if (req.user.role === 'shopkeeper' && order.shopkeeper.toString() !== req.user.id) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not authorized to view this order'
-            });
-        }
+        // // Check if user has access to this order
+        // if (req.user.role === 'shopkeeper' && order.shopkeeper.toString() !== req.user.id) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: 'Not authorized to view this order'
+        //     });
+        // }
 
-        if (req.user.role === 'supplier' && order.supplier.toString() !== req.user.id) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not authorized to view this order'
-            });
-        }
+        // if (req.user.role === 'supplier' && order.supplier.toString() !== req.user.id) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: 'Not authorized to view this order'
+        //     });
+        // }
 
         res.json({
             success: true,
@@ -112,20 +112,20 @@ exports.updateOrderStatus = async (req, res) => {
             });
         }
 
-        // Check if user has access to this order
-        if (req.user.role === 'shopkeeper' && order.shopkeeper.toString() !== req.user.id) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not authorized to update this order'
-            });
-        }
+        // // Check if user has access to this order
+        // if (req.user.role === 'shopkeeper' && order.shopkeeper.toString() !== req.user.id) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: 'Not authorized to update this order'
+        //     });
+        // }
 
-        if (req.user.role === 'supplier' && order.supplier.toString() !== req.user.id) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not authorized to update this order'
-            });
-        }
+        // if (req.user.role === 'supplier' && order.supplier.toString() !== req.user.id) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: 'Not authorized to update this order'
+        //     });
+        // }
 
         // Update product quantities when order is delivered
         if (req.body.status === 'delivered' && order.status !== 'delivered') {
