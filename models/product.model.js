@@ -52,6 +52,12 @@ const productSchema = new mongoose.Schema({
         unique: true,
         sparse: true
     },
+
+    sku: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
     // Inventory fields
     quantity: {
         type: Number,
@@ -76,7 +82,7 @@ const productSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active', 'expired', 'returned'],
+        enum: ['active', 'inactive'],
         default: 'active'
     },
     isActive: {
