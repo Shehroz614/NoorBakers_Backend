@@ -103,19 +103,15 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        console.log("user", req.user);
+        const user = await User.findById(req.user._id);
 
         res.json({
             success: true,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                businessName: user.businessName
-            }
+            user
         });
     } catch (error) {
+        console.log("error", error);
         res.status(500).json({
             success: false,
             message: error.message

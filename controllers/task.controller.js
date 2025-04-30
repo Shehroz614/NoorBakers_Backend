@@ -39,9 +39,9 @@ exports.getTasks = async (req, res) => {
         if (req.query.category) query.category = req.query.category;
 
         const tasks = await Task.find(query)
-            .populate('assignedTo', 'name businessName')
-            .populate('createdBy', 'name businessName')
-            .populate('verifiedBy', 'name businessName')
+            // .populate('assignedTo', 'name businessName')
+            // .populate('createdBy', 'name businessName')
+            // .populate('verifiedBy', 'name businessName')
             .sort('-createdAt');
 
         res.json({

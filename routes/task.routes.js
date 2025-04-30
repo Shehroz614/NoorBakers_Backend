@@ -17,7 +17,7 @@ router.use(protect);
 // Routes accessible by all authenticated users
 router.get('/', getTasks);
 router.get('/:id', getTask);
-router.put('/:id/status', updateTaskStatus);
+router.patch('/:id/status', updateTaskStatus);
 router.post('/:id/attachments', addAttachment);
 
 // Routes accessible only by superadmin

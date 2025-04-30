@@ -52,6 +52,10 @@ const productSchema = new mongoose.Schema({
         unique: true,
         sparse: true
     },
+    productImage: {
+        type: String,
+        
+    },
 
     sku: {
         type: String,

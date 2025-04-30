@@ -27,7 +27,7 @@ exports.createOrder = async (req, res) => {
 exports.getOrders = async (req, res) => {
     try {
         let query = {};
-        
+
         // Filter based on user role
         if (req.user.role === 'shopkeeper') {
             query.shopkeeper = req.user.id;
@@ -60,7 +60,7 @@ exports.getOrders = async (req, res) => {
 exports.getOrder = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id)
-            .populate('shopkeeper', 'name businessName')
+            .populate('shopkeeper', 'name businessName email address phone')
             .populate('supplier', 'name businessName')
             .populate('products.product', 'name unit price');
 
@@ -279,7 +279,7 @@ exports.updateReturnStatus = async (req, res) => {
 
         // If return is completed, update order status if all returns are completed
         if (status === 'completed') {
-            const allReturnsCompleted = order.products.every(p => 
+            const allReturnsCompleted = order.products.every(p =>
                 p.returned === 0 || p.returnStatus === 'completed'
             );
             if (allReturnsCompleted) {

@@ -18,7 +18,7 @@ router.get('/me', getUser);
 // Routes accessible only by superadmin
 router.get('/', authorize('superadmin'), getUsers);
 router.get('/role/:role', authorize('superadmin'), getUsersByRole);
-router.put('/:id', updateUser);
+router.patch('/:id', updateUser);
 router.delete('/:id', authorize('superadmin'), deleteUser);
 
 module.exports = router; 

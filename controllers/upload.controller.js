@@ -6,11 +6,13 @@ exports.uploadSingle = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
-
+        console.log(req.file);
         // Return the file path
         res.status(200).json({
             message: 'File uploaded successfully',
-            filePath: req.file.path
+            filePath: req.file.path,
+            fileName: req.file.filename,
+            fileSize: req.file.size,
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -27,10 +29,11 @@ exports.uploadMultiple = async (req, res) => {
         }
 
         // Return the file paths
-        const filePaths = req.files.map(file => file.path);
+        const files = req.files.map(file => { return { filePath: file.path, fileName: file.filename, fileSize: file.size } });
+
         res.status(200).json({
             message: 'Files uploaded successfully',
-            filePaths: filePaths
+            files: files
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
