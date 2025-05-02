@@ -1,6 +1,7 @@
 const Order = require('../models/order.model');
 const Product = require('../models/product.model');
 const User = require('../models/user.model');
+const { createNotificationHelper } = require('./notification.controller'); // Import the helper
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -9,6 +10,39 @@ exports.createOrder = async (req, res) => {
     try {
         req.body.shopkeeper = req.user.id;
         const order = await Order.create(req.body);
+
+        // Create a notification for the shopkeeper
+        const shopkeeperNotification = await createNotificationHelper(
+            req.user.id, // userId: The shopkeeper who placed the order
+            'New Order Created', // title
+            `Your order #${order._id} has been successfully placed.`, // message
+            'success', // type
+            'order', // category
+            { orderId: order._id }, // data
+            `/orders/${order._id}` // link
+        );
+
+        if (!shopkeeperNotification) {
+            console.error('Failed to create shopkeeper notification for order:', order._id);
+        }
+
+        // Optionally, notify the supplier if present
+        if (order.supplier) {
+            const supplierNotification = await createNotificationHelper(
+                order.supplier, // userId: The supplier of the order
+                'New Order Received', // title
+                `You have received a new order #${order._id} from shopkeeper.`, // message
+                'info', // type
+                'order', // category
+                { orderId: order._id }, // data
+                `/orders/${order._id}` // link
+            );
+
+            if (!supplierNotification) {
+                console.error('Failed to create supplier notification for order:', order._id);
+            }
+        }
+
         res.status(201).json({
             success: true,
             data: order
@@ -387,4 +421,4 @@ exports.updateDisputeStatus = async (req, res) => {
             message: error.message
         });
     }
-}; 
+};

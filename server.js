@@ -29,7 +29,7 @@ app.use('/api/', limiter);
 // CORS configuration
 const corsOptions = {
     origin: "*",
-    credentials: true
+    credentials: false
 };
 app.use(cors(corsOptions));
 
