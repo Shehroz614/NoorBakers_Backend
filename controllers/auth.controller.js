@@ -109,9 +109,6 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.logout = async (req, res) => {
     res.cookie('token', '', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
         expires: new Date(0),
         domain: process.env.NODE_ENV === 'production' ? 'noorbakers.com' : 'localhost'
     });
