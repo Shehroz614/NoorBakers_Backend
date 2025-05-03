@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 // Load environment variables
 dotenv.config();
@@ -15,9 +16,16 @@ dotenv.config();
 const app = express();
 
 // Security middleware
-app.use(helmet()); // Set security headers
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginEmbedderPolicy: false
+})); // Set security headers
 app.use(mongoSanitize()); // Prevent NoSQL injection
 app.use(xss()); // Prevent XSS attacks
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -28,8 +36,8 @@ app.use('/api/', limiter);
 
 // CORS configuration
 const corsOptions = {
-    origin: "*",
-    credentials: false
+    origin: ['http://localhost:3000', 'https://noorbakers.com'],
+    credentials: true,
 };
 app.use(cors(corsOptions));
 

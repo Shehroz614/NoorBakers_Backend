@@ -38,16 +38,16 @@ exports.register = async (req, res) => {
         // Create token
         const token = generateToken(user._id);
 
+        // Set cookie
+        res.cookie('token', token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            domain: process.env.NODE_ENV === 'production' ? 'noorbakers.com' : 'localhost'
+        });
+
         res.status(201).json({
             success: true,
             token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                businessName: user.businessName
-            }
+            user
         });
     } catch (error) {
         res.status(500).json({
@@ -85,6 +85,12 @@ exports.login = async (req, res) => {
         // Create token
         const token = generateToken(user._id);
 
+        // Set cookie
+        res.cookie('token', token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            domain: process.env.NODE_ENV === 'production' ? 'noorbakers.com' : 'localhost'
+        });
+
         res.json({
             success: true,
             token,
@@ -98,12 +104,28 @@ exports.login = async (req, res) => {
     }
 };
 
+// @desc    Logout user
+// @route   GET /api/auth/logout
+// @access  Private
+exports.logout = async (req, res) => {
+    res.cookie('token', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none',
+        expires: new Date(0),
+        domain: process.env.NODE_ENV === 'production' ? 'noorbakers.com' : 'localhost'
+    });
+    res.json({
+        success: true,
+        message: 'Logged out successfully'
+    });
+};
+
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
 // @access  Private
 exports.getMe = async (req, res) => {
     try {
-        console.log("user", req.user);
         const user = await User.findById(req.user._id);
 
         res.json({
@@ -111,7 +133,6 @@ exports.getMe = async (req, res) => {
             user
         });
     } catch (error) {
-        console.log("error", error);
         res.status(500).json({
             success: false,
             message: error.message
