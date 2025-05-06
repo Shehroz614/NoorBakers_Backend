@@ -64,6 +64,7 @@ const taskSchema = new mongoose.Schema({
     },
     correctiveActions: {
         type: String,
+        
     }
 }, {
     timestamps: true

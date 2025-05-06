@@ -31,7 +31,7 @@ exports.createOrder = async (req, res) => {
             const supplierNotification = await createNotificationHelper(
                 order.supplier, // userId: The supplier of the order
                 'New Order Received', // title
-                `You have received a new order #${order._id} from shopkeeper.`, // message
+                `You have received a new order #${order.orderNumber} from shopkeeper.`, // message
                 'info', // type
                 'order', // category
                 { orderId: order._id }, // data
@@ -93,7 +93,7 @@ exports.getOrders = async (req, res) => {
 // @access  Private
 exports.getOrder = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id)
+        const order = await Order?.findById(req.params.id)
             .populate('shopkeeper', 'name businessName email address phone')
             .populate('supplier', 'name businessName')
             .populate('products.product', 'name unit price');

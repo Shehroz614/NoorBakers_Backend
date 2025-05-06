@@ -117,15 +117,15 @@ exports.updateTaskStatus = async (req, res) => {
         }
 
         // For HACCP tasks, require corrective actions when completing
-        if (task.type === 'haccp' && req.body.status === 'completed') {
-            if (!req.body.correctiveActions) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Corrective actions are required for HACCP tasks'
-                });
-            }
-            task.correctiveActions = req.body.correctiveActions;
-        }
+        // if (task.type === 'haccp' && req.body.status === 'completed') {
+        //     if (!req.body.correctiveActions) {
+        //         return res.status(400).json({
+        //             success: false,
+        //             message: 'Corrective actions are required for HACCP tasks'
+        //         });
+        //     }
+        //     task.correctiveActions = req.body.correctiveActions;
+        // }
 
         task.status = req.body.status;
         await task.save();
