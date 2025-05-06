@@ -4,11 +4,34 @@ const Product = require('../models/product.model');
 // @route   POST /api/products
 // @access  Private/Supplier
 exports.createProduct = async (req, res) => {
-    console.log(`User role ${req.user.role} is not authorized to access this route`);
-
+    // console.log(`User role ${req.user.role} is not authorized to access this route`);
     try {
         req.body.supplier = req.user.id;
         req.body.location = req.user.role === 'supplier' ? 'supplier' : 'shop';
+
+        // Handle convertRawToReady and rawItems
+        const { convertRawToReady, rawItems } = req.body;
+        if (convertRawToReady && Array.isArray(rawItems)) {
+            for (const item of rawItems) {
+                const { id, quantity } = item;
+                const rawProduct = await Product.findById(id);
+                if (!rawProduct) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Raw product with id ${id} not found`
+                    });
+                }
+                if (rawProduct.quantity < quantity) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Insufficient quantity for raw product ${rawProduct.name}`
+                    });
+                }
+                rawProduct.quantity -= quantity;
+                await rawProduct.save();
+            }
+        }
+
         const product = await Product.create(req.body);
         res.status(201).json({
             success: true,
