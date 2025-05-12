@@ -539,10 +539,12 @@ exports.generateInvoice = async (req, res) => {
 
         res.set({
             'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="Invoice_${order.orderNumber}.pdf"`,
-            'Content-Length': pdfBuffer.length
+            'Content-Disposition': `attachment; filename="Invoice_${order.orderNumber}.pdf"`
+            // 'Content-Disposition': `attachment; filename="Invoice_${order.orderNumber}.pdf"`,
+            // 'Content-Length': pdfBuffer.length
         });
-        res.send(pdfBuffer);
+        // res.send(pdfBuffer);
+        res.end(pdfBuffer);
     } catch (error) {
         res.status(500).json({
             success: false,
