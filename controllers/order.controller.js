@@ -2,6 +2,7 @@ const Order = require('../models/order.model');
 const Product = require('../models/product.model');
 const User = require('../models/user.model');
 const { createNotificationHelper } = require('./notification.controller'); // Import the helper
+const puppeteer = require('puppeteer');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -170,6 +171,16 @@ exports.updateOrderStatus = async (req, res) => {
                     await product.save();
                 }
             }
+        }
+
+        // Add to history if status is changed
+        if (order.status !== req.body.status) {
+            order.history = order.history || [];
+            order.history.push({
+                status: req.body.status,
+                changedAt: new Date(),
+                changedBy: req.body.changedBy
+            });
         }
 
         order.status = req.body.status;
@@ -415,6 +426,123 @@ exports.updateDisputeStatus = async (req, res) => {
             success: true,
             data: order
         });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// @desc    Generate and download invoice PDF for an order
+// @route   GET /api/orders/:id/invoice
+// @access  Private
+exports.generateInvoice = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id)
+            .populate('shopkeeper', 'name businessName email address phone')
+            .populate('supplier', 'name businessName email address phone')
+            .populate('products.product', 'name unit price');
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+
+        // Build beautiful HTML for the invoice
+        const html = `
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
+                .invoice-box { max-width: 800px; margin: 40px auto; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+                h1 { color: #4a90e2; margin-bottom: 0; }
+                .header, .footer { text-align: center; }
+                .info-table { width: 100%; margin: 20px 0; }
+                .info-table td { padding: 4px 8px; }
+                .products-table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+                .products-table th, .products-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; }
+                .products-table th { background: #f0f4fa; color: #333; }
+                .total-row td { font-weight: bold; font-size: 1.1em; }
+                .status { display: inline-block; padding: 4px 12px; border-radius: 8px; background: #e3fcef; color: #27ae60; font-weight: bold; }
+                .footer { margin-top: 40px; color: #888; font-size: 0.95em; }
+            </style>
+        </head>
+        <body>
+            <div class="invoice-box">
+                <div class="header">
+                    <h1>Noor Bakers</h1>
+                    <div style="color:#888;">Order Invoice</div>
+                </div>
+                <table class="info-table">
+                    <tr>
+                        <td><b>Order #:</b> ${order.orderNumber}</td>
+                        <td><b>Date:</b> ${order.createdAt.toLocaleDateString()}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Shopkeeper:</b> ${order.shopkeeper?.name || ''} (${order.shopkeeper?.businessName || ''})</td>
+                        <td><b>Supplier:</b> ${order.supplier?.name || ''} (${order.supplier?.businessName || ''})</td>
+                    </tr>
+                    <tr>
+                        <td><b>Status:</b> <span class="status">${order.status}</span></td>
+                        <td><b>Payment:</b> ${order.paymentStatus} (${order.paymentMethod})</td>
+                    </tr>
+                </table>
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Unit</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.products.map((item, idx) => `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${item.product?.name || ''}</td>
+                                <td>${item.product?.unit || ''}</td>
+                                <td>${item.price.toFixed(2)}</td>
+                                <td>${item.quantity}</td>
+                                <td>${(item.price * item.quantity).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="5" style="text-align:right;">Total:</td>
+                            <td>${order.totalAmount.toFixed(2)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div style="margin-top:30px;"><b>Notes:</b> ${order.notes || 'N/A'}</div>
+                <div class="footer">
+                    Thank you for your business!<br/>
+                    Noor Bakers &copy; ${new Date().getFullYear()}
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
+        // Generate PDF with Puppeteer
+        const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+        await browser.close();
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="Invoice_${order.orderNumber}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        res.send(pdfBuffer);
     } catch (error) {
         res.status(500).json({
             success: false,

@@ -85,6 +85,11 @@ const orderSchema = new mongoose.Schema({
         },
         resolvedAt: Date
     }],
+    history: [{
+        status: String,
+        changedAt: { type: Date, default: Date.now },
+        changedBy: String
+    }],
     isActive: {
         type: Boolean,
         default: true

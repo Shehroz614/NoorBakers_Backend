@@ -8,7 +8,8 @@ const {
     requestReturn,
     updateReturnStatus,
     addDispute,
-    updateDisputeStatus
+    updateDisputeStatus,
+    generateInvoice
 } = require('../controllers/order.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -20,6 +21,7 @@ router.get('/', getOrders);
 router.get('/:id', getOrder);
 router.put('/:id/status', updateOrderStatus);
 router.post('/:id/disputes', addDispute);
+router.get('/:id/invoice', generateInvoice);
 
 // Routes accessible only by shopkeepers
 router.post('/', authorize('shopkeeper'), createOrder);
