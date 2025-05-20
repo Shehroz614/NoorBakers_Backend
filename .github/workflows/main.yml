@@ -36,5 +36,5 @@ jobs:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_PRIVATE_KEY }}
-          script: pm2 restart api
+          script: /home/ubuntu/.nvm/versions/node/v22.15.1/bin/pm2 restart api
 
