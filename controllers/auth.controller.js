@@ -41,7 +41,7 @@ exports.register = async (req, res) => {
         // Set cookie
         res.cookie('token', token, {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-            domain: process.env.NODE_ENV === 'production' ? 'noorbakers.com' : 'localhost'
+            domain: process.env.NODE_ENV === 'production' ? '.noorbakersandsweets.co.uk' : 'localhost'
         });
 
         res.status(201).json({
@@ -88,7 +88,7 @@ exports.login = async (req, res) => {
         // Set cookie
         res.cookie('token', token, {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-            domain: process.env.NODE_ENV === 'production' ? 'noorbakers.com' : 'localhost'
+            domain: process.env.NODE_ENV === 'production' ? '.noorbakersandsweets.co.uk' : 'localhost'
         });
 
         res.json({
@@ -110,7 +110,7 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
     res.cookie('token', '', {
         expires: new Date(0),
-        domain: process.env.NODE_ENV === 'production' ? 'noorbakers.com' : 'localhost'
+        domain: process.env.NODE_ENV === 'production' ? '.noorbakersandsweets.co.uk' : 'localhost'
     });
     res.json({
         success: true,
