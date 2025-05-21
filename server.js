@@ -35,34 +35,16 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration
-const corsOptions = {
-    origin: function (origin, callback) {
-        const allowedOrigins = [
-            'http://localhost:3000',
-            'https://noorbakers.com',
-            'http://noorbakers.com'
-        ];
-        
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+app.use(cors({
+    origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     exposedHeaders: ['Set-Cookie'],
-};
-
-// Apply CORS middleware
-app.use(cors(corsOptions));
+}));
 
 // Handle CORS preflight requests
-app.options('*', cors(corsOptions));
+app.options('*', cors());
 
 // Body parser middleware with size limits
 app.use(express.json({ limit: '10kb' }));
