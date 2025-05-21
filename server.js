@@ -8,6 +8,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 
 // Load environment variables
 dotenv.config();
@@ -15,6 +16,9 @@ dotenv.config();
 // Create Express app
 const app = express();
 app.set('trust proxy', 1);
+
+// Logging middleware
+app.use(morgan('dev'));
 
 // Security middleware
 app.use(helmet({
@@ -31,21 +35,22 @@ app.use(cookieParser());
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 5 * 60 * 1000, // 15 minutes
-    max: 100000 // limit each IP to 100 requests per windowMs
+    max: 100000 // limit each IP to 100000 requests per windowMs
 });
 app.use('/api/', limiter);
 
 // CORS configuration
 app.use(cors({
     origin: '*',
-    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     exposedHeaders: ['Set-Cookie'],
 }));
 
 // Handle CORS preflight requests
-app.options('*', cors());
+app.options('*', cors({
+    origin: '*'
+}));
 
 // Body parser middleware with size limits
 app.use(express.json({ limit: '10kb' }));
