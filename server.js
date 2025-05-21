@@ -41,15 +41,20 @@ app.use('/api/', limiter);
 
 // CORS configuration
 app.use(cors({
-    origin: '*',
+    origin: function (origin, callback) {
+        callback(null, origin);
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     exposedHeaders: ['Set-Cookie'],
 }));
 
-// Handle CORS preflight requests
 app.options('*', cors({
-    origin: '*'
+    origin: function (origin, callback) {
+        callback(null, origin);
+    },
+    credentials: true
 }));
 
 // Body parser middleware with size limits
