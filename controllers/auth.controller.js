@@ -44,7 +44,7 @@ exports.register = async (req, res) => {
             domain: process.env.NODE_ENV === 'production' ? '.noorbakersandsweets.co.uk' : 'localhost',
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none'
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
 
         res.status(201).json({
@@ -94,7 +94,7 @@ exports.login = async (req, res) => {
             domain: process.env.NODE_ENV === 'production' ? '.noorbakersandsweets.co.uk' : 'localhost',
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none'
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
 
         res.json({
@@ -119,7 +119,7 @@ exports.logout = async (req, res) => {
         domain: process.env.NODE_ENV === 'production' ? '.noorbakersandsweets.co.uk' : 'localhost',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none'
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
     res.json({
         success: true,
