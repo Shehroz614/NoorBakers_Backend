@@ -18,7 +18,11 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Logging middleware
-app.use(morgan('dev'));
+app.use(morgan('dev', {
+  skip: function (req, res) {
+    return req.method === 'OPTIONS';
+  }
+}));
 
 // Security middleware
 app.use(helmet({
