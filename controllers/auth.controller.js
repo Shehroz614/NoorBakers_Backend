@@ -1,11 +1,20 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
-// Generate JWT Token
+// Helper to generate JWT Token
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRE
     });
+};
+
+// Helper to capitalize names (first letter uppercase, rest lowercase)
+const formatName = (str = '') => {
+    return str
+        .trim()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
 };
 
 // @desc    Register user
@@ -13,10 +22,23 @@ const generateToken = (id) => {
 // @access  Public
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, role, businessName, address, phone } = req.body;
+        // Destructure and normalize inputs
+        const {
+            name,
+            email,
+            password,
+            role,
+            businessName,
+            address,
+            phone
+        } = req.body;
+
+        const normalizedEmail = email.toLowerCase();
+        const formattedName = formatName(name);
+        const formattedBusinessName = formatName(businessName);
 
         // Check if user exists
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: normalizedEmail });
         if (userExists) {
             return res.status(400).json({
                 success: false,
@@ -26,11 +48,11 @@ exports.register = async (req, res) => {
 
         // Create user
         const user = await User.create({
-            name,
-            email,
+            name: formattedName,
+            email: normalizedEmail,
             password,
             role,
-            businessName,
+            businessName: formattedBusinessName,
             address,
             phone
         });
@@ -66,9 +88,10 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        const normalizedEmail = email.toLowerCase();
 
         // Check for user email
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.findOne({ email: normalizedEmail }).select('+password');
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -144,4 +167,4 @@ exports.getMe = async (req, res) => {
             message: error.message
         });
     }
-}; 
+};
