@@ -7,7 +7,7 @@ const sendEmailOnFormSubmission = async (req, res) => {
         const cvFile = req.file; // Assuming you're using multer for file upload
 
         // Validate required fields
-        const requiredFields = ['name', 'email', 'phone']; // Add any other required fields
+        const requiredFields = ['fullName', 'email', 'phone']; // Add any other required fields
         for (const field of requiredFields) {
             if (!formData[field]) {
                 return res.status(400).json({
